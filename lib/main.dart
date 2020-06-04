@@ -35,6 +35,60 @@ class _home_taskState extends State<home_task> {
   File _isImage;
   List _output;
   @override
+  open_gallery(BuildContext context) async{
+
+    var get_Image=await ImagePicker.pickImage(source: ImageSource.gallery);
+    this.setState(() {
+      _isImage=get_Image;
+    });
+    if(get_Image==null) return null;
+    setState(() {
+      _isLoading=true;
+      _isImage=get_Image;
+    });
+    RunModelOnImage(get_Image);
+    Navigator.of(context).pop();
+  }
+  open_camera(BuildContext context) async{
+    var get_Image=await ImagePicker.pickImage(source: ImageSource.camera);
+    this.setState(() {
+      _isImage=get_Image;
+    });
+    setState(() {
+      _isLoading=true;
+      _isImage=get_Image;
+    });
+    RunModelOnImage(get_Image);
+    Navigator.of(context).pop();
+  }
+  Future<void> _showChoiceDialog(BuildContext context){
+    return showDialog(context: context,builder: (BuildContext context){
+      return AlertDialog(
+        title: Text(" SELECT ONE "),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              GestureDetector(
+                child: Text('GALLERY'),
+                onTap: (){// open gallery for US
+
+                  open_gallery(context);
+                },
+              ),
+              Padding(padding: EdgeInsets.all(5.0),),
+              GestureDetector(
+                child: Text('CAMERA'),
+                onTap: (){// open camera for US
+
+                  open_camera(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
 
   void initState(){
     super.initState();
@@ -46,6 +100,18 @@ class _home_taskState extends State<home_task> {
       });
     });
   }
+
+  Widget display_image(){
+    if(_isImage==null)
+    {
+      return Text("NO IMAGE SELECTED(SELECT THE XRAY IMAGE TO PREDICT )");
+    }
+    else
+    {
+      return Image.file(_isImage,width: 400,height: 400,);
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -56,14 +122,13 @@ class _home_taskState extends State<home_task> {
     child:Column(
           children: <Widget>[
             Padding(padding: const EdgeInsets.all(20),),
-            _isImage==null?Container():Expanded(child:Image.file(_isImage,width: 400,height: 400,)),
-            SizedBox(height: 1,),
-            Padding(padding: const EdgeInsets.all(40),),
+            display_image(),
+            Padding(padding: const EdgeInsets.all(80),),
             RaisedButton(
               color: Colors.green,
 
               onPressed: (){
-                selectImage();
+                _showChoiceDialog(context);
               },
               child: Text("ADD IMAGE"),
             ),
@@ -77,13 +142,8 @@ class _home_taskState extends State<home_task> {
   }
 
   selectImage() async{
-    var get_Image=await ImagePicker.pickImage(source: ImageSource.gallery);
-    if(get_Image==null) return null;
-    setState(() {
-      _isLoading=true;
-      _isImage=get_Image;
-    });
-    RunModelOnImage(get_Image);
+
+
   }
   
   RunModelOnImage(File image) async{
